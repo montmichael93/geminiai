@@ -70,7 +70,7 @@ app.use((req, res, next) => {
   }
 
   // ALWAYS serve the app on port 3000
-  const PORT = 3000;
+  const PORT = 8000;
   server.listen(PORT, "0.0.0.0", () => {
     log(`Serving on port ${PORT}`);
   });
