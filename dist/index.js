@@ -326,7 +326,7 @@ app.use((req, res, next) => {
   const path5 = req.path;
   let capturedJsonResponse = void 0;
   const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
+  res.json = function(bodyJson, ...args) {
     capturedJsonResponse = bodyJson;
     return originalResJson.apply(res, [bodyJson, ...args]);
   };
