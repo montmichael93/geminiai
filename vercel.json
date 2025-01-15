@@ -2,5 +2,11 @@
     "env": {
         "GOOGLE_API_KEY": "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA",
         "NODE_ENV": "development"
-    }
+    },
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/client/dist/$1"
+        }
+    ]
 }
