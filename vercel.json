@@ -1,15 +1,22 @@
 {
-    "version": 2,
     "builds": [
         {
-            "src": "package.json",
+            "src": "vite.config.ts",
             "use": "@vercel/node"
+        },
+        {
+            "src": "client/dist/**/*",
+            "use": "@vercel/static"
         }
     ],
+    "env": {
+        "GOOGLE_API_KEY": "@google_api_key",
+        "NODE_ENV": "production"
+    },
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "/dist/$1"
+            "dest": "/client/dist/$1"
         }
     ]
 }
