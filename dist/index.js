@@ -313,9 +313,6 @@ function serveStatic(app2) {
 
 // server/index.ts
 var env2 = setupEnvironment();
-console.log("\n--- Environment Setup Debug ---");
-console.log("Environment variables loaded:", env2);
-console.log("--- End Debug ---\n");
 var __filename4 = fileURLToPath4(import.meta.url);
 var __dirname4 = path4.dirname(__filename4);
 var app = express2();
@@ -351,6 +348,7 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
     res.status(status).json({ message });
+    log(`Error occurred: ${message}`);
     throw err;
   });
   if (app.get("env") === "development") {
@@ -358,8 +356,8 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
-  const PORT = 3e3;
+  const PORT = 8e3;
   server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
+    log(`Serving on port ${PORT}`);
   });
 })();
