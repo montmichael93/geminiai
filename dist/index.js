@@ -235,7 +235,17 @@ var vite_config_default = defineConfig({
   root: path2.resolve(__dirname2, "client"),
   build: {
     outDir: path2.resolve(__dirname2, "dist/public"),
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      input: path2.resolve(__dirname2, "client/index.html")
+      // Ensure the entry point is correct
+    }
+  },
+  server: {
+    port: 3e3,
+    // Specify a development server port if needed
+    strictPort: true
+    // Fail if the port is already in use
   }
 });
 
@@ -348,7 +358,6 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
     res.status(status).json({ message });
-    log(`Error occurred: ${message}`);
     throw err;
   });
   if (app.get("env") === "development") {
@@ -356,8 +365,8 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
-  const PORT = 8e3;
+  const PORT = 3e3;
   server.listen(PORT, "0.0.0.0", () => {
-    log(`Serving on port ${PORT}`);
+    log(`serving on port ${PORT}`);
   });
 })();
