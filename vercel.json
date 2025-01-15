@@ -1,10 +1,4 @@
 {
-    "builds": [
-        {
-            "src": "client/dist/**/*",
-            "use": "@vercel/static"
-        }
-    ],
     "env": {
         "GOOGLE_API_KEY": "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA",
         "NODE_ENV": "production"
