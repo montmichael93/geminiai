@@ -313,9 +313,7 @@ function serveStatic(app2) {
 
 // server/index.ts
 var env2 = setupEnvironment();
-console.log("\n--- Environment Setup Debug ---");
 console.log("Environment variables loaded:", env2);
-console.log("--- End Debug ---\n");
 var __filename4 = fileURLToPath4(import.meta.url);
 var __dirname4 = path4.dirname(__filename4);
 var app = express2();

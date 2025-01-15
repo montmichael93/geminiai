@@ -1,7 +1,6 @@
 {
     "env": {
-      "GOOGLE_API_KEY": "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA",
-      "NODE_ENV": "production"
+        "GOOGLE_API_KEY": "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA",
+        "NODE_ENV": "development"
     }
-  }
-  
+}
