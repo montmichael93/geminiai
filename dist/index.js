@@ -235,7 +235,17 @@ var vite_config_default = defineConfig({
   root: path2.resolve(__dirname2, "client"),
   build: {
     outDir: path2.resolve(__dirname2, "dist/public"),
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      input: path2.resolve(__dirname2, "client/index.html")
+      // Ensure the entry point is correct
+    }
+  },
+  server: {
+    port: 3e3,
+    // Specify a development server port if needed
+    strictPort: true
+    // Fail if the port is already in use
   }
 });
 
