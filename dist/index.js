@@ -234,18 +234,8 @@ var vite_config_default = defineConfig({
   },
   root: path2.resolve(__dirname2, "client"),
   build: {
-    outDir: "client/dist",
-    emptyOutDir: true,
-    rollupOptions: {
-      input: path2.resolve(__dirname2, "client/index.html")
-      // Ensure the entry point is correct
-    }
-  },
-  server: {
-    port: 3e3,
-    // Specify a development server port if needed
-    strictPort: true
-    // Fail if the port is already in use
+    outDir: path2.resolve(__dirname2, "dist/public"),
+    emptyOutDir: true
   }
 });
 
@@ -323,6 +313,9 @@ function serveStatic(app2) {
 
 // server/index.ts
 var env2 = setupEnvironment();
+console.log("\n--- Environment Setup Debug ---");
+console.log("Environment variables loaded:", env2);
+console.log("--- End Debug ---\n");
 var __filename4 = fileURLToPath4(import.meta.url);
 var __dirname4 = path4.dirname(__filename4);
 var app = express2();
