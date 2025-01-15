@@ -1,7 +1,17 @@
 {
+    "builds": [
+        {
+            "src": "vite.config.ts",
+            "use": "@vercel/node"
+        },
+        {
+            "src": "client/dist/**/*",
+            "use": "@vercel/static"
+        }
+    ],
     "env": {
         "GOOGLE_API_KEY": "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA",
-        "NODE_ENV": "development"
+        "NODE_ENV": "production"
     },
     "routes": [
         {
