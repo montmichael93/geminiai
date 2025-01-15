@@ -7,9 +7,9 @@ import { setupVite, serveStatic, log } from "./vite";
 
 // Setup environment variables first
 const env = setupEnvironment();
-console.log("\n--- Environment Setup Debug ---");
+("\n--- Environment Setup Debug ---");
 console.log("Environment variables loaded:", env);
-console.log("--- End Debug ---\n");
+("--- End Debug ---\n");
 
 // Get the directory name properly with ES modules
 const __filename = fileURLToPath(import.meta.url);
