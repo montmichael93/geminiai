@@ -18,7 +18,7 @@ export default defineConfig({
   },
   root: path.resolve(__dirname, "client"),
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: 'client/dist',
     emptyOutDir: true,
     rollupOptions: {
       input: path.resolve(__dirname, "client/index.html"), // Ensure the entry point is correct
@@ -29,5 +29,3 @@ export default defineConfig({
     strictPort: true, // Fail if the port is already in use
   },
 });
-
-
