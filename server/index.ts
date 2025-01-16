@@ -7,9 +7,6 @@ import { setupVite, serveStatic, log } from "./vite";
 
 // Setup environment variables first
 const env = setupEnvironment();
-("\n--- Environment Setup Debug ---");
-console.log("Environment variables loaded:", env);
-("--- End Debug ---\n");
 
 // Get the directory name properly with ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -48,31 +45,3 @@ app.use((req, res, next) => {
 
   next();
 });
-
-(async () => {
-  const server = registerRoutes(app);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "production") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
-
-  // ALWAYS serve the app on port 3000
-  // this serves both the API and the client
-  const PORT = 3000;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
-  });
-})();
