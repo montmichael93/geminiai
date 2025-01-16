@@ -1,20 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import {
-  GoogleGenerativeAI,
-  type ChatSession,
-  type GenerateContentResult,
-} from "@google/generative-ai";
+import { GoogleGenerativeAI, type ChatSession } from "@google/generative-ai";
 import { marked } from "marked";
 import { setupEnvironment } from "./env";
 import cors from "cors";
 
 const env = setupEnvironment();
 const genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
-
-
-
-
 
 const model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash-exp",
@@ -26,90 +18,38 @@ const model = genAI.getGenerativeModel({
   },
 });
 
-
 // Store chat sessions in memory
 const chatSessions = new Map<string, ChatSession>();
 
-// Format raw text into proper markdown
+// Format raw text into markdown
 async function formatResponseToMarkdown(
   text: string | Promise<string>
 ): Promise<string> {
-  // Ensure we have a string to work with
   const resolvedText = await Promise.resolve(text);
-
-  // First, ensure consistent newlines
   let processedText = resolvedText.replace(/\r\n/g, "\n");
-
-  // Process main sections (lines that start with word(s) followed by colon)
-  processedText = processedText.replace(
-    /^([A-Za-z][A-Za-z\s]+):(\s*)/gm,
-    "## $1$2"
-  );
-
-  // Process sub-sections (any remaining word(s) followed by colon within text)
-  processedText = processedText.replace(
-    /(?<=\n|^)([A-Za-z][A-Za-z\s]+):(?!\d)/gm,
-    "### $1"
-  );
-
-  // Process bullet points
+  processedText = processedText.replace(/^([A-Za-z][A-Za-z\s]+):(\s*)/gm, "## $1$2");
+  processedText = processedText.replace(/(?<=\n|^)([A-Za-z][A-Za-z\s]+):(?!\d)/gm, "### $1");
   processedText = processedText.replace(/^[•●○]\s*/gm, "* ");
-
-  // Split into paragraphs
   const paragraphs = processedText.split("\n\n").filter(Boolean);
-
-  // Process each paragraph
   const formatted = paragraphs
-    .map((p) => {
-      // If it's a header or list item, preserve it
-      if (p.startsWith("#") || p.startsWith("*") || p.startsWith("-")) {
-        return p;
-      }
-      // Add proper paragraph formatting
-      return `${p}\n`;
-    })
+    .map((p) => p.startsWith("#") || p.startsWith("*") || p.startsWith("-") ? p : `${p}\n`)
     .join("\n\n");
 
-  // Configure marked options for better header rendering
   marked.setOptions({
     gfm: true,
     breaks: true,
   });
 
-  // Convert markdown to HTML using marked
   return marked.parse(formatted);
 }
 
-interface WebSource {
-  uri: string;
-  title: string;
-}
-
-interface GroundingChunk {
-  web?: WebSource;
-}
-
-interface TextSegment {
-  startIndex: number;
-  endIndex: number;
-  text: string;
-}
-
-interface GroundingSupport {
-  segment: TextSegment;
-  groundingChunkIndices: number[];
-  confidenceScores: number[];
-}
-
-interface GroundingMetadata {
-  groundingChunks: GroundingChunk[];
-  groundingSupports: GroundingSupport[];
-  searchEntryPoint?: any;
-  webSearchQueries?: string[];
-}
-
-
 export function registerRoutes(app: Express): Server {
+  // CORS settings to allow both website and localhost
+  app.use(cors({
+    origin: ["https://geminiai-six.vercel.app", "http://localhost:3000"],  // Allow website and localhost
+    methods: ["GET", "POST"],
+  }));
+
   // Search endpoint - creates a new chat session
   app.get("/api/search", async (req, res) => {
     try {
@@ -120,7 +60,6 @@ export function registerRoutes(app: Express): Server {
         });
       }
 
-      // Start a new chat session with the model
       const chat = model.startChat({
         tools: [
           {
@@ -130,7 +69,6 @@ export function registerRoutes(app: Express): Server {
         ],
       });
 
-      // Generate content with search tool
       const result = await chat.sendMessage(query);
       if (!result || !result.response) {
         return res.status(500).json({
@@ -138,13 +76,6 @@ export function registerRoutes(app: Express): Server {
         });
       }
       const response = await result.response;
-
-
-
-
-
-
-
       const rawText = response.text();
       if (!rawText) {
         throw new Error("No response text received from AI.");
@@ -154,11 +85,7 @@ export function registerRoutes(app: Express): Server {
       const formattedText = await formatResponseToMarkdown(rawText);
 
       // Extract sources
-      const sourceMap = new Map<
-        string,
-        { title: string; url: string; snippet: string }
-      >();
-
+      const sourceMap = new Map<string, { title: string; url: string; snippet: string }>();
       const metadata = response.candidates?.[0]?.groundingMetadata as any;
       if (metadata) {
         const chunks = metadata.groundingChunks || [];
@@ -169,12 +96,9 @@ export function registerRoutes(app: Express): Server {
             const url = chunk.web.uri;
             if (!sourceMap.has(url)) {
               const snippets = supports
-                .filter((support: any) =>
-                  support.groundingChunkIndices.includes(index)
-                )
+                .filter((support: any) => support.groundingChunkIndices.includes(index))
                 .map((support: any) => support.segment.text)
                 .join(" ");
-
               sourceMap.set(url, {
                 title: chunk.web.title,
                 url: url,
@@ -204,17 +128,11 @@ export function registerRoutes(app: Express): Server {
       });
     }
   });
-  app.use(cors({
-    origin: "https://geminiai-six.vercel.app", // Allow specific origin
-    methods: ["GET", "POST"],                 // Allow necessary methods
-  }));
-
 
   // Follow-up endpoint - continues existing chat session
   app.post("/api/follow-up", async (req, res) => {
     try {
       const { sessionId, query } = req.body;
-
       if (!sessionId || !query) {
         return res.status(400).json({
           message: "Both sessionId and query are required",
@@ -228,33 +146,12 @@ export function registerRoutes(app: Express): Server {
         });
       }
 
-      // Send follow-up message in existing chat
       const result = await chat.sendMessage(query);
       const response = await result.response;
-      console.log(
-        "Raw Google API Follow-up Response:",
-        JSON.stringify(
-          {
-            text: response.text(),
-            candidates: response.candidates,
-            groundingMetadata: response.candidates?.[0]?.groundingMetadata,
-          },
-          null,
-          2
-        )
-      );
       const text = response.text();
-
-      // Format the response text to proper markdown/HTML
       const formattedText = await formatResponseToMarkdown(text);
 
-      // Extract sources from grounding metadata
-      const sourceMap = new Map<
-        string,
-        { title: string; url: string; snippet: string }
-      >();
-
-      // Get grounding metadata from response
+      const sourceMap = new Map<string, { title: string; url: string; snippet: string }>();
       const metadata = response.candidates?.[0]?.groundingMetadata as any;
       if (metadata) {
         const chunks = metadata.groundingChunks || [];
@@ -264,14 +161,10 @@ export function registerRoutes(app: Express): Server {
           if (chunk.web?.uri && chunk.web?.title) {
             const url = chunk.web.uri;
             if (!sourceMap.has(url)) {
-              // Find snippets that reference this chunk
               const snippets = supports
-                .filter((support: any) =>
-                  support.groundingChunkIndices.includes(index)
-                )
+                .filter((support: any) => support.groundingChunkIndices.includes(index))
                 .map((support: any) => support.segment.text)
                 .join(" ");
-
               sourceMap.set(url, {
                 title: chunk.web.title,
                 url: url,
@@ -301,8 +194,3 @@ export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
   return httpServer;
 }
-
-
-
-
-
