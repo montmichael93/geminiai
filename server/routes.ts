@@ -138,7 +138,7 @@ export function registerRoutes(app: Express): Server {
           2
         )
       );
-      const text = response.text();
+      const text = await response.text();
 
       // Format the response text to proper markdown/HTML
       const formattedText = await formatResponseToMarkdown(text);
@@ -230,7 +230,7 @@ export function registerRoutes(app: Express): Server {
           2
         )
       );
-      const text = response.text();
+      const text = await response.text();
 
       // Format the response text to proper markdown/HTML
       const formattedText = await formatResponseToMarkdown(text);
