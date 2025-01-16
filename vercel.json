@@ -1,15 +1,5 @@
 {
     "env": {
         "GOOGLE_API_KEY": "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA"
-    },
-    "routes": [
-        {
-            "src": "/api/(.*)",
-            "dest": "/server/index.ts"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/client/index.html"
-        }
-    ]
+    }
 }

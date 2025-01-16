@@ -6,7 +6,9 @@ import { setupEnvironment } from "./env";
 import cors from "cors";
 
 const env = setupEnvironment();
-const genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
+const GOOGLE_API_KEY = 'AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA';
+const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+
 
 const model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash-exp",
@@ -44,11 +46,6 @@ async function formatResponseToMarkdown(
 }
 
 export function registerRoutes(app: Express): Server {
-  // CORS settings to allow both website and localhost
-  app.use(cors({
-    origin: ["https://geminiai-six.vercel.app", "http://localhost:3000"],  // Allow website and localhost
-    methods: ["GET", "POST"],
-  }));
 
   // Search endpoint - creates a new chat session
   app.get("/api/search", async (req, res) => {

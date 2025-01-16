@@ -32,7 +32,6 @@ import express2 from "express";
 import { createServer } from "http";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { marked } from "marked";
-import cors from "cors";
 var env = setupEnvironment();
 var genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
 var model = genAI.getGenerativeModel({
@@ -65,11 +64,6 @@ async function formatResponseToMarkdown(text) {
   return marked.parse(formatted);
 }
 function registerRoutes(app2) {
-  app2.use(cors({
-    origin: ["https://geminiai-six.vercel.app", "http://localhost:3000"],
-    // Allow website and localhost
-    methods: ["GET", "POST"]
-  }));
   app2.get("/api/search", async (req, res) => {
     try {
       const query = decodeURIComponent(req.query.q);
