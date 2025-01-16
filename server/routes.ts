@@ -10,15 +10,18 @@ import { setupEnvironment } from "./env";
 
 const env = setupEnvironment();
 const genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
+
+
 const model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash-exp",
   generationConfig: {
-    temperature: 0.9,
-    topP: 1,
-    topK: 1,
-    maxOutputTokens: 2048,
+    temperature: 0.7,  // Adjust for balanced creativity
+    topP: 0.95,        // Allow more diverse results
+    topK: 40,          // Broaden search scope
+    maxOutputTokens: 4096, // Increase token limit
   },
 });
+
 
 // Store chat sessions in memory
 const chatSessions = new Map<string, ChatSession>();
@@ -105,15 +108,12 @@ export function registerRoutes(app: Express): Server {
   // Search endpoint - creates a new chat session
   app.get("/api/search", async (req, res) => {
     try {
-      const query = req.query.q as string;
-
+      const query = decodeURIComponent(req.query.q as string);
       if (!query) {
         return res.status(400).json({
           message: "Query parameter 'q' is required",
         });
       }
-
-      const decodedQuery = decodeURIComponent(query);
 
       // Start a new chat session with the model
       const chat = model.startChat({
@@ -125,9 +125,20 @@ export function registerRoutes(app: Express): Server {
         ],
       });
 
-      // Generate content with search
-      const result = await chat.sendMessage(decodedQuery);
+      // Generate content with search tool
+      const result = await chat.sendMessage(query);
+      if (!result || !result.response) {
+        return res.status(500).json({
+          message: "No response from the generative AI model",
+        });
+      }
       const response = await result.response;
+
+
+
+
+
+
 
       const rawText = response.text();
       if (!rawText) {
@@ -181,11 +192,10 @@ export function registerRoutes(app: Express): Server {
         sources,
       });
     } catch (error: any) {
-      console.error("Search error:", error.message, error.stack);
+      console.error("Search error:", error);
       res.status(500).json({
-        message:
-          "An error occurred while processing your request. Please try again later.",
-        error: error.message,
+        message: error.message || "An error occurred while processing your search",
+        details: error.stack || "No stack trace available",
       });
     }
   });
@@ -282,3 +292,8 @@ export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
   return httpServer;
 }
+
+
+
+
+
