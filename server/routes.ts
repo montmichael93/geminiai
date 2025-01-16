@@ -113,43 +113,36 @@ export function registerRoutes(app: Express): Server {
         });
       }
 
-      // Create a new chat session with search capability
+      const decodedQuery = decodeURIComponent(query);
+
+      // Start a new chat session with the model
       const chat = model.startChat({
         tools: [
           {
-            // @ts-ignore - google_search is a valid tool but not typed in the SDK yet
+            // @ts-ignore - google_search tool supported but not typed
             google_search: {},
           },
         ],
       });
 
-      // Generate content with search tool
-      const result = await chat.sendMessage(query);
+      // Generate content with search
+      const result = await chat.sendMessage(decodedQuery);
       const response = await result.response;
-      console.log(
-        "Raw Google API Response:",
-        JSON.stringify(
-          {
-            text: response.text(),
-            candidates: response.candidates,
-            groundingMetadata: response.candidates?.[0]?.groundingMetadata,
-          },
-          null,
-          2
-        )
-      );
-      const text = await response.text();
 
-      // Format the response text to proper markdown/HTML
-      const formattedText = await formatResponseToMarkdown(text);
+      const rawText = response.text();
+      if (!rawText) {
+        throw new Error("No response text received from AI.");
+      }
 
-      // Extract sources from grounding metadata
+      // Format the response into markdown
+      const formattedText = await formatResponseToMarkdown(rawText);
+
+      // Extract sources
       const sourceMap = new Map<
         string,
         { title: string; url: string; snippet: string }
       >();
 
-      // Get grounding metadata from response
       const metadata = response.candidates?.[0]?.groundingMetadata as any;
       if (metadata) {
         const chunks = metadata.groundingChunks || [];
@@ -159,7 +152,6 @@ export function registerRoutes(app: Express): Server {
           if (chunk.web?.uri && chunk.web?.title) {
             const url = chunk.web.uri;
             if (!sourceMap.has(url)) {
-              // Find snippets that reference this chunk
               const snippets = supports
                 .filter((support: any) =>
                   support.groundingChunkIndices.includes(index)
@@ -179,7 +171,7 @@ export function registerRoutes(app: Express): Server {
 
       const sources = Array.from(sourceMap.values());
 
-      // Generate a session ID and store the chat
+      // Generate session ID
       const sessionId = Math.random().toString(36).substring(7);
       chatSessions.set(sessionId, chat);
 
@@ -189,13 +181,15 @@ export function registerRoutes(app: Express): Server {
         sources,
       });
     } catch (error: any) {
-      console.error("Search error:", error);
+      console.error("Search error:", error.message, error.stack);
       res.status(500).json({
         message:
-          error.message || "An error occurred while processing your search",
+          "An error occurred while processing your request. Please try again later.",
+        error: error.message,
       });
     }
   });
+
 
   // Follow-up endpoint - continues existing chat session
   app.post("/api/follow-up", async (req, res) => {
@@ -230,7 +224,7 @@ export function registerRoutes(app: Express): Server {
           2
         )
       );
-      const text = await response.text();
+      const text = response.text();
 
       // Format the response text to proper markdown/HTML
       const formattedText = await formatResponseToMarkdown(text);
