@@ -5,11 +5,11 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/server/index.js"
+            "dest": "/server/index.ts"
         },
         {
             "src": "/(.*)",
-            "dest": "/client/dist/index.html"
+            "dest": "/client/index.html"
         }
     ]
 }
