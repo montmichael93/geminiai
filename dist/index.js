@@ -30,9 +30,7 @@ import express2 from "express";
 
 // server/routes.ts
 import { createServer } from "http";
-import {
-  GoogleGenerativeAI
-} from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { marked } from "marked";
 import cors from "cors";
 var env = setupEnvironment();
@@ -54,23 +52,12 @@ var chatSessions = /* @__PURE__ */ new Map();
 async function formatResponseToMarkdown(text) {
   const resolvedText = await Promise.resolve(text);
   let processedText = resolvedText.replace(/\r\n/g, "\n");
-  processedText = processedText.replace(
-    /^([A-Za-z][A-Za-z\s]+):(\s*)/gm,
-    "## $1$2"
-  );
-  processedText = processedText.replace(
-    /(?<=\n|^)([A-Za-z][A-Za-z\s]+):(?!\d)/gm,
-    "### $1"
-  );
+  processedText = processedText.replace(/^([A-Za-z][A-Za-z\s]+):(\s*)/gm, "## $1$2");
+  processedText = processedText.replace(/(?<=\n|^)([A-Za-z][A-Za-z\s]+):(?!\d)/gm, "### $1");
   processedText = processedText.replace(/^[•●○]\s*/gm, "* ");
   const paragraphs = processedText.split("\n\n").filter(Boolean);
-  const formatted = paragraphs.map((p) => {
-    if (p.startsWith("#") || p.startsWith("*") || p.startsWith("-")) {
-      return p;
-    }
-    return `${p}
-`;
-  }).join("\n\n");
+  const formatted = paragraphs.map((p) => p.startsWith("#") || p.startsWith("*") || p.startsWith("-") ? p : `${p}
+`).join("\n\n");
   marked.setOptions({
     gfm: true,
     breaks: true
@@ -78,6 +65,11 @@ async function formatResponseToMarkdown(text) {
   return marked.parse(formatted);
 }
 function registerRoutes(app2) {
+  app2.use(cors({
+    origin: ["https://geminiai-six.vercel.app", "http://localhost:3000"],
+    // Allow website and localhost
+    methods: ["GET", "POST"]
+  }));
   app2.get("/api/search", async (req, res) => {
     try {
       const query = decodeURIComponent(req.query.q);
@@ -115,9 +107,7 @@ function registerRoutes(app2) {
           if (chunk.web?.uri && chunk.web?.title) {
             const url = chunk.web.uri;
             if (!sourceMap.has(url)) {
-              const snippets = supports.filter(
-                (support) => support.groundingChunkIndices.includes(index)
-              ).map((support) => support.segment.text).join(" ");
+              const snippets = supports.filter((support) => support.groundingChunkIndices.includes(index)).map((support) => support.segment.text).join(" ");
               sourceMap.set(url, {
                 title: chunk.web.title,
                 url,
@@ -143,12 +133,6 @@ function registerRoutes(app2) {
       });
     }
   });
-  app2.use(cors({
-    origin: "https://geminiai-six.vercel.app",
-    // Allow specific origin
-    methods: ["GET", "POST"]
-    // Allow necessary methods
-  }));
   app2.post("/api/follow-up", async (req, res) => {
     try {
       const { sessionId, query } = req.body;
@@ -165,18 +149,6 @@ function registerRoutes(app2) {
       }
       const result = await chat.sendMessage(query);
       const response = await result.response;
-      console.log(
-        "Raw Google API Follow-up Response:",
-        JSON.stringify(
-          {
-            text: response.text(),
-            candidates: response.candidates,
-            groundingMetadata: response.candidates?.[0]?.groundingMetadata
-          },
-          null,
-          2
-        )
-      );
       const text = response.text();
       const formattedText = await formatResponseToMarkdown(text);
       const sourceMap = /* @__PURE__ */ new Map();
@@ -188,9 +160,7 @@ function registerRoutes(app2) {
           if (chunk.web?.uri && chunk.web?.title) {
             const url = chunk.web.uri;
             if (!sourceMap.has(url)) {
-              const snippets = supports.filter(
-                (support) => support.groundingChunkIndices.includes(index)
-              ).map((support) => support.segment.text).join(" ");
+              const snippets = supports.filter((support) => support.groundingChunkIndices.includes(index)).map((support) => support.segment.text).join(" ");
               sourceMap.set(url, {
                 title: chunk.web.title,
                 url,
