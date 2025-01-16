@@ -7,9 +7,13 @@ import {
 } from "@google/generative-ai";
 import { marked } from "marked";
 import { setupEnvironment } from "./env";
+import cors from "cors";
 
 const env = setupEnvironment();
 const genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
+
+
+
 
 
 const model = genAI.getGenerativeModel({
@@ -103,6 +107,7 @@ interface GroundingMetadata {
   searchEntryPoint?: any;
   webSearchQueries?: string[];
 }
+
 
 export function registerRoutes(app: Express): Server {
   // Search endpoint - creates a new chat session
@@ -199,6 +204,10 @@ export function registerRoutes(app: Express): Server {
       });
     }
   });
+  app.use(cors({
+    origin: "https://geminiai-six.vercel.app", // Allow specific origin
+    methods: ["GET", "POST"],                 // Allow necessary methods
+  }));
 
 
   // Follow-up endpoint - continues existing chat session

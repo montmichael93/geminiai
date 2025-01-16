@@ -34,15 +34,20 @@ import {
   GoogleGenerativeAI
 } from "@google/generative-ai";
 import { marked } from "marked";
+import cors from "cors";
 var env = setupEnvironment();
 var genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
 var model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash-exp",
   generationConfig: {
-    temperature: 0.9,
-    topP: 1,
-    topK: 1,
-    maxOutputTokens: 2048
+    temperature: 0.7,
+    // Adjust for balanced creativity
+    topP: 0.95,
+    // Allow more diverse results
+    topK: 40,
+    // Broaden search scope
+    maxOutputTokens: 4096
+    // Increase token limit
   }
 });
 var chatSessions = /* @__PURE__ */ new Map();
@@ -75,7 +80,7 @@ async function formatResponseToMarkdown(text) {
 function registerRoutes(app2) {
   app2.get("/api/search", async (req, res) => {
     try {
-      const query = req.query.q;
+      const query = decodeURIComponent(req.query.q);
       if (!query) {
         return res.status(400).json({
           message: "Query parameter 'q' is required"
@@ -84,27 +89,23 @@ function registerRoutes(app2) {
       const chat = model.startChat({
         tools: [
           {
-            // @ts-ignore - google_search is a valid tool but not typed in the SDK yet
+            // @ts-ignore - google_search tool supported but not typed
             google_search: {}
           }
         ]
       });
       const result = await chat.sendMessage(query);
+      if (!result || !result.response) {
+        return res.status(500).json({
+          message: "No response from the generative AI model"
+        });
+      }
       const response = await result.response;
-      console.log(
-        "Raw Google API Response:",
-        JSON.stringify(
-          {
-            text: response.text(),
-            candidates: response.candidates,
-            groundingMetadata: response.candidates?.[0]?.groundingMetadata
-          },
-          null,
-          2
-        )
-      );
-      const text = response.text();
-      const formattedText = await formatResponseToMarkdown(text);
+      const rawText = response.text();
+      if (!rawText) {
+        throw new Error("No response text received from AI.");
+      }
+      const formattedText = await formatResponseToMarkdown(rawText);
       const sourceMap = /* @__PURE__ */ new Map();
       const metadata = response.candidates?.[0]?.groundingMetadata;
       if (metadata) {
@@ -137,10 +138,17 @@ function registerRoutes(app2) {
     } catch (error) {
       console.error("Search error:", error);
       res.status(500).json({
-        message: error.message || "An error occurred while processing your search"
+        message: error.message || "An error occurred while processing your search",
+        details: error.stack || "No stack trace available"
       });
     }
   });
+  app2.use(cors({
+    origin: "https://geminiai-six.vercel.app",
+    // Allow specific origin
+    methods: ["GET", "POST"]
+    // Allow necessary methods
+  }));
   app2.post("/api/follow-up", async (req, res) => {
     try {
       const { sessionId, query } = req.body;
@@ -333,7 +341,7 @@ app.use((req, res, next) => {
   const path5 = req.path;
   let capturedJsonResponse = void 0;
   const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
+  res.json = function(bodyJson, ...args) {
     capturedJsonResponse = bodyJson;
     return originalResJson.apply(res, [bodyJson, ...args]);
   };
@@ -360,7 +368,7 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
     throw err;
   });
-  if (app.get("env") === "production") {
+  if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
