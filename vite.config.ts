@@ -24,6 +24,7 @@ export default defineConfig({
   },
   server: {
     port: 3000, // Specify a development server port if needed
-    strictPort: true, // Fail if the port is already in use
+    host: true, // Allows access from network devices (optional)
+
   },
 });

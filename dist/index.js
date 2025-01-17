@@ -218,28 +218,30 @@ import { createServer as createViteServer, createLogger } from "vite";
 // vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
 import path2, { dirname } from "path";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { fileURLToPath as fileURLToPath2 } from "url";
 var __filename2 = fileURLToPath2(import.meta.url);
 var __dirname2 = dirname(__filename2);
 var vite_config_default = defineConfig({
-  plugins: [react()],
+  plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   resolve: {
     alias: {
       "@db": path2.resolve(__dirname2, "db"),
       "@": path2.resolve(__dirname2, "client", "src")
     }
   },
-  root: "client",
+  root: path2.resolve(__dirname2, "client"),
   build: {
-    outDir: "dist/public",
+    outDir: path2.resolve(__dirname2, "dist/public"),
     emptyOutDir: true
   },
   server: {
     port: 3e3,
     // Specify a development server port if needed
-    strictPort: true
-    // Fail if the port is already in use
+    host: true
+    // Allows access from network devices (optional)
   }
 });
 
