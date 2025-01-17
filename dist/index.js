@@ -30,34 +30,42 @@ import express2 from "express";
 
 // server/routes.ts
 import { createServer } from "http";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  GoogleGenerativeAI
+} from "@google/generative-ai";
 import { marked } from "marked";
 var env = setupEnvironment();
-var GOOGLE_API_KEY = "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA";
-var genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+var genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
 var model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash-exp",
   generationConfig: {
-    temperature: 0.7,
-    // Adjust for balanced creativity
-    topP: 0.95,
-    // Allow more diverse results
-    topK: 40,
-    // Broaden search scope
-    maxOutputTokens: 4096
-    // Increase token limit
+    temperature: 0.9,
+    topP: 1,
+    topK: 1,
+    maxOutputTokens: 2048
   }
 });
 var chatSessions = /* @__PURE__ */ new Map();
 async function formatResponseToMarkdown(text) {
   const resolvedText = await Promise.resolve(text);
   let processedText = resolvedText.replace(/\r\n/g, "\n");
-  processedText = processedText.replace(/^([A-Za-z][A-Za-z\s]+):(\s*)/gm, "## $1$2");
-  processedText = processedText.replace(/(?<=\n|^)([A-Za-z][A-Za-z\s]+):(?!\d)/gm, "### $1");
+  processedText = processedText.replace(
+    /^([A-Za-z][A-Za-z\s]+):(\s*)/gm,
+    "## $1$2"
+  );
+  processedText = processedText.replace(
+    /(?<=\n|^)([A-Za-z][A-Za-z\s]+):(?!\d)/gm,
+    "### $1"
+  );
   processedText = processedText.replace(/^[•●○]\s*/gm, "* ");
   const paragraphs = processedText.split("\n\n").filter(Boolean);
-  const formatted = paragraphs.map((p) => p.startsWith("#") || p.startsWith("*") || p.startsWith("-") ? p : `${p}
-`).join("\n\n");
+  const formatted = paragraphs.map((p) => {
+    if (p.startsWith("#") || p.startsWith("*") || p.startsWith("-")) {
+      return p;
+    }
+    return `${p}
+`;
+  }).join("\n\n");
   marked.setOptions({
     gfm: true,
     breaks: true
@@ -67,7 +75,7 @@ async function formatResponseToMarkdown(text) {
 function registerRoutes(app2) {
   app2.get("/api/search", async (req, res) => {
     try {
-      const query = decodeURIComponent(req.query.q);
+      const query = req.query.q;
       if (!query) {
         return res.status(400).json({
           message: "Query parameter 'q' is required"
@@ -76,23 +84,27 @@ function registerRoutes(app2) {
       const chat = model.startChat({
         tools: [
           {
-            // @ts-ignore - google_search tool supported but not typed
+            // @ts-ignore - google_search is a valid tool but not typed in the SDK yet
             google_search: {}
           }
         ]
       });
       const result = await chat.sendMessage(query);
-      if (!result || !result.response) {
-        return res.status(500).json({
-          message: "No response from the generative AI model"
-        });
-      }
       const response = await result.response;
-      const rawText = response.text();
-      if (!rawText) {
-        throw new Error("No response text received from AI.");
-      }
-      const formattedText = await formatResponseToMarkdown(rawText);
+      console.log(
+        "Raw Google API Response:",
+        JSON.stringify(
+          {
+            text: response.text(),
+            candidates: response.candidates,
+            groundingMetadata: response.candidates?.[0]?.groundingMetadata
+          },
+          null,
+          2
+        )
+      );
+      const text = response.text();
+      const formattedText = await formatResponseToMarkdown(text);
       const sourceMap = /* @__PURE__ */ new Map();
       const metadata = response.candidates?.[0]?.groundingMetadata;
       if (metadata) {
@@ -102,7 +114,9 @@ function registerRoutes(app2) {
           if (chunk.web?.uri && chunk.web?.title) {
             const url = chunk.web.uri;
             if (!sourceMap.has(url)) {
-              const snippets = supports.filter((support) => support.groundingChunkIndices.includes(index)).map((support) => support.segment.text).join(" ");
+              const snippets = supports.filter(
+                (support) => support.groundingChunkIndices.includes(index)
+              ).map((support) => support.segment.text).join(" ");
               sourceMap.set(url, {
                 title: chunk.web.title,
                 url,
@@ -123,8 +137,7 @@ function registerRoutes(app2) {
     } catch (error) {
       console.error("Search error:", error);
       res.status(500).json({
-        message: error.message || "An error occurred while processing your search",
-        details: error.stack || "No stack trace available"
+        message: error.message || "An error occurred while processing your search"
       });
     }
   });
@@ -144,6 +157,18 @@ function registerRoutes(app2) {
       }
       const result = await chat.sendMessage(query);
       const response = await result.response;
+      console.log(
+        "Raw Google API Follow-up Response:",
+        JSON.stringify(
+          {
+            text: response.text(),
+            candidates: response.candidates,
+            groundingMetadata: response.candidates?.[0]?.groundingMetadata
+          },
+          null,
+          2
+        )
+      );
       const text = response.text();
       const formattedText = await formatResponseToMarkdown(text);
       const sourceMap = /* @__PURE__ */ new Map();
@@ -155,7 +180,9 @@ function registerRoutes(app2) {
           if (chunk.web?.uri && chunk.web?.title) {
             const url = chunk.web.uri;
             if (!sourceMap.has(url)) {
-              const snippets = supports.filter((support) => support.groundingChunkIndices.includes(index)).map((support) => support.segment.text).join(" ");
+              const snippets = supports.filter(
+                (support) => support.groundingChunkIndices.includes(index)
+              ).map((support) => support.segment.text).join(" ");
               sourceMap.set(url, {
                 title: chunk.web.title,
                 url,
@@ -209,6 +236,12 @@ var vite_config_default = defineConfig({
   build: {
     outDir: path2.resolve(__dirname2, "dist/public"),
     emptyOutDir: true
+  },
+  server: {
+    port: 3e3,
+    // Specify a development server port if needed
+    strictPort: true
+    // Fail if the port is already in use
   }
 });
 
