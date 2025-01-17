@@ -1,28 +1,14 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "server/index.ts",
-            "use": "@vercel/node",
-            "config": {
-                "includeFiles": [
-                    "dist/public/**"
-                ]
-            }
-        },
-        {
-            "src": "dist/public/**",
-            "use": "@vercel/static"
-        }
-    ],
+    "framework": "vite",
     "routes": [
         {
             "src": "/assets/(.*)",
-            "dest": "/public/assets/$1"
+            "dest": "/assets/$1"
         },
         {
             "src": "/(.*)",
-            "dest": "/index.js"
+            "dest": "/index.html"
         }
     ],
     "env": {
