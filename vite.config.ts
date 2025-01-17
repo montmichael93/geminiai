@@ -9,16 +9,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default defineConfig({
-  plugins: [react(), runtimeErrorOverlay(), themePlugin()],
+  plugins: [react()],
   resolve: {
     alias: {
       "@db": path.resolve(__dirname, "db"),
       "@": path.resolve(__dirname, "client", "src"),
     },
   },
-  root: path.resolve(__dirname, "client"),
+  root: 'client',
   build: {
-    outDir: path.resolve(__dirname, "client/index.html"),
+    outDir: 'dist/public',
     emptyOutDir: true,
 
   },
@@ -27,3 +27,4 @@ export default defineConfig({
     strictPort: true, // Fail if the port is already in use
   },
 });
+
