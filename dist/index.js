@@ -33,7 +33,8 @@ import { createServer } from "http";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { marked } from "marked";
 var env = setupEnvironment();
-var genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
+var GOOGLE_API_KEY = "AIzaSyDEPEgUlqSxhWtZ30lBoQYKIMX8U0fwZlA";
+var genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
 var model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash-exp",
   generationConfig: {
@@ -207,17 +208,7 @@ var vite_config_default = defineConfig({
   root: path2.resolve(__dirname2, "client"),
   build: {
     outDir: path2.resolve(__dirname2, "dist/public"),
-    emptyOutDir: true,
-    rollupOptions: {
-      input: path2.resolve(__dirname2, "client/index.html")
-      // Ensure the entry point is correct
-    }
-  },
-  server: {
-    port: 3e3,
-    // Specify a development server port if needed
-    strictPort: true
-    // Fail if the port is already in use
+    emptyOutDir: true
   }
 });
 
