@@ -1,9 +1,10 @@
 import { Switch, Route, useLocation } from "wouter";
-import { Home } from "@/pages/Home";
-import { Search } from "@/pages/Search";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { AlertCircle } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
+import { Home } from "./pages/Home";
+import { Search } from "./pages/Search";
+import { Card, CardContent } from "./components/ui/card";
 
 function App() {
   const [location] = useLocation();

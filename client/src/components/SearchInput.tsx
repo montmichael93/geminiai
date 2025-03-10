@@ -1,8 +1,8 @@
-import { useState, KeyboardEvent } from 'react';
-import { Textarea } from '@/components/ui/textarea'; // Use Textarea instead of Input
-import { Button } from '@/components/ui/button';
-import { Search, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState, KeyboardEvent } from "react";
+import { Textarea } from "../components/ui/textarea"; // Use Textarea instead of Input
+import { Button } from "../components/ui/button";
+import { Search, Loader2 } from "lucide-react";
+import { cn } from "../lib/utils";
 
 interface SearchInputProps {
   onSearch: (query: string) => void;
@@ -15,7 +15,7 @@ interface SearchInputProps {
 export function SearchInput({
   onSearch,
   isLoading = false,
-  initialValue = '',
+  initialValue = "",
   autoFocus = false,
   large = false,
 }: SearchInputProps) {
@@ -28,7 +28,7 @@ export function SearchInput({
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault(); // Prevent new line and trigger search
       handleSubmit();
     }
@@ -57,7 +57,7 @@ export function SearchInput({
           disabled={isLoading}
           autoFocus={autoFocus}
           rows={3} // Start small and expand
-          style={{ minHeight: '40px', maxHeight: '120px', overflowY: 'auto' }}
+          style={{ minHeight: "40px", maxHeight: "120px", overflowY: "auto" }}
         />
       </div>
 
@@ -70,9 +70,11 @@ export function SearchInput({
         )}
       >
         {isLoading ? (
-          <Loader2 className={cn("animate-spin", large ? "h-5 w-5" : "h-4 w-4")} />
+          <Loader2
+            className={cn("animate-spin", large ? "h-5 w-5" : "h-4 w-4")}
+          />
         ) : (
-          'Search'
+          "Search"
         )}
       </Button>
     </div>

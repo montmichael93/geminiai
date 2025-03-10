@@ -12,17 +12,16 @@ export default defineConfig({
   plugins: [react(), runtimeErrorOverlay(), themePlugin()],
   resolve: {
     alias: {
-      "@db": path.resolve(__dirname, "db"),
-      "@": path.resolve(__dirname, "client", "src"),
+      "@db": path.resolve(__dirname, "../db"),
+      "@": path.resolve(__dirname, "src"),
     },
   },
-  root: path.resolve(__dirname, "client"),
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: path.resolve(__dirname, "../client/dist"),
     emptyOutDir: true,
   },
   server: {
-    port: 3002, // Specify a development server port if needed
-    host: true, // Allows access from network devices (optional)
+    port: 3000,
+    host: true,
   },
 });

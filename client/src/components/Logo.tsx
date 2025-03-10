@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { motion } from "framer-motion";
+import { cn } from "../lib/utils";
 
 interface LogoProps {
   className?: string;
@@ -17,11 +17,15 @@ export function Logo({ className, animate = false }: LogoProps) {
       className={cn("w-[52px] h-[52px]", className)}
       initial={animate ? { rotate: 0 } : undefined}
       animate={animate ? { rotate: 360 } : undefined}
-      transition={animate ? {
-        duration: 2,
-        repeat: Infinity,
-        ease: "linear"
-      } : undefined}
+      transition={
+        animate
+          ? {
+              duration: 2,
+              repeat: Infinity,
+              ease: "linear",
+            }
+          : undefined
+      }
     >
       <motion.path
         fillRule="evenodd"
@@ -30,31 +34,43 @@ export function Logo({ className, animate = false }: LogoProps) {
         fill="url(#paint0_linear_39_18)"
         initial={!animate ? { scale: 0.8, opacity: 0 } : undefined}
         animate={!animate ? { scale: 1, opacity: 1 } : undefined}
-        transition={!animate ? {
-          duration: 0.8,
-          ease: [0.16, 1, 0.3, 1]
-        } : undefined}
+        transition={
+          !animate
+            ? {
+                duration: 0.8,
+                ease: [0.16, 1, 0.3, 1],
+              }
+            : undefined
+        }
       />
       <defs>
         <motion.linearGradient
           id="paint0_linear_39_18"
           gradientUnits="userSpaceOnUse"
-          animate={!animate ? {
-            x1: ["-20", "30", "-20"],
-            y1: ["60", "0", "60"],
-            x2: ["70", "20", "70"],
-            y2: ["-10", "50", "-10"]
-          } : {
-            x1: "6.20579",
-            y1: "43.7756",
-            x2: "41.9987",
-            y2: "38.2037"
-          }}
-          transition={!animate ? {
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut"
-          } : undefined}
+          animate={
+            !animate
+              ? {
+                  x1: ["-20", "30", "-20"],
+                  y1: ["60", "0", "60"],
+                  x2: ["70", "20", "70"],
+                  y2: ["-10", "50", "-10"],
+                }
+              : {
+                  x1: "6.20579",
+                  y1: "43.7756",
+                  x2: "41.9987",
+                  y2: "38.2037",
+                }
+          }
+          transition={
+            !animate
+              ? {
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }
+              : undefined
+          }
         >
           {animate ? (
             <>
@@ -69,56 +85,56 @@ export function Logo({ className, animate = false }: LogoProps) {
               <motion.stop
                 animate={{
                   stopColor: ["#439DDF", "#4F87ED", "#439DDF"],
-                  offset: ["0", "0.3", "0"]
+                  offset: ["0", "0.3", "0"],
                 }}
                 transition={{
                   duration: 6,
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: "easeInOut",
                 }}
               />
               <motion.stop
                 animate={{
                   stopColor: ["#4F87ED", "#9476C5", "#4F87ED"],
-                  offset: ["0.4", "0.8", "0.4"]
+                  offset: ["0.4", "0.8", "0.4"],
                 }}
                 transition={{
                   duration: 6,
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: "easeInOut",
                 }}
               />
               <motion.stop
                 animate={{
                   stopColor: ["#9476C5", "#BC688E", "#9476C5"],
-                  offset: ["0.65", "0.9", "0.65"]
+                  offset: ["0.65", "0.9", "0.65"],
                 }}
                 transition={{
                   duration: 6,
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: "easeInOut",
                 }}
               />
               <motion.stop
                 animate={{
                   stopColor: ["#BC688E", "#D6645D", "#BC688E"],
-                  offset: ["0.8", "1", "0.8"]
+                  offset: ["0.8", "1", "0.8"],
                 }}
                 transition={{
                   duration: 6,
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: "easeInOut",
                 }}
               />
               <motion.stop
                 animate={{
-                  stopColor: ["#D6645D", "#439DDF", "#D6645D"]
+                  stopColor: ["#D6645D", "#439DDF", "#D6645D"],
                 }}
                 offset="1"
                 transition={{
                   duration: 6,
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: "easeInOut",
                 }}
               />
             </>

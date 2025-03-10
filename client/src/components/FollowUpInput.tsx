@@ -1,8 +1,9 @@
-import { useState, KeyboardEvent } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { MessageSquarePlus, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState, KeyboardEvent } from "react";
+
+import { MessageSquarePlus, Loader2 } from "lucide-react";
+import { Input } from "./ui/input";
+import { cn } from "../lib/utils";
+import { Button } from "./ui/button";
 
 interface FollowUpInputProps {
   onSubmit: (query: string) => void;
@@ -13,17 +14,17 @@ export function FollowUpInput({
   onSubmit,
   isLoading = false,
 }: FollowUpInputProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   const handleSubmit = () => {
     if (query.trim() && !isLoading) {
       onSubmit(query.trim());
-      setQuery('');
+      setQuery("");
     }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
