@@ -20,11 +20,9 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
-
   },
   server: {
-    port: 3000, // Specify a development server port if needed
+    port: 3002, // Specify a development server port if needed
     host: true, // Allows access from network devices (optional)
-
   },
 });
